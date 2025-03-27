@@ -25,6 +25,11 @@ class SingleChar(CharConverterBase):
 
 
 class Grayscale(CharConverterBase):
+    reversed = False
+
+    def __init__(self, reversed=False):
+        self.reversed = reversed
+
     def convert(self, img: Image.Image) -> str:
         img = img.convert("L")
 
@@ -33,9 +38,18 @@ class Grayscale(CharConverterBase):
 
         denominator = 300 // len(GSCALE)
 
-        ascii_image = [
-            "".join(GSCALE[pixel // denominator] for pixel in pixels[i : i + width])
-            for i in range(0, len(pixels), width)
-        ]
+        if self.reversed:
+            ascii_image = [
+                "".join(
+                    GSCALE[-(pixel // denominator) - 1]
+                    for pixel in pixels[i : i + width]
+                )
+                for i in range(0, len(pixels), width)
+            ]
+        else:
+            ascii_image = [
+                "".join(GSCALE[pixel // denominator] for pixel in pixels[i : i + width])
+                for i in range(0, len(pixels), width)
+            ]
 
         return "\n".join(ascii_image)
