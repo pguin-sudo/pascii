@@ -1,14 +1,15 @@
-from PIL import Image
-
 from typing import Type, TypeVar
 
-from pascii.converters import colors, chars
+from PIL import Image
+
+from pascii.converters import chars, colors
 
 T = TypeVar("T", bound="AsciiArt")
 
 
 class AsciiArt:
     img: Image.Image
+    size: tuple[int, int]
     char_converter: chars.CharConverterBase
     color_converter: colors.ColorConverterBase
 
@@ -21,6 +22,7 @@ class AsciiArt:
         self.img = img
         self.char_converter = char_converter
         self.color_converter = color_converter
+        self.width, self.height = img.size
 
     @classmethod
     def from_path(
@@ -37,20 +39,22 @@ class AsciiArt:
 
         return cls(img, char_converter, color_converter)
 
-    def resize(self, new_width: int | None = None, new_height: int | None = None):
+    def resize(
+        self, new_width: int = 0, new_height: int = 0, ratio_multiplier: float = 0.55
+    ):
         width, height = self.img.size
         aspect_ratio = height / width
-        if new_height is None and new_width is None:
+        if not new_height and not new_width:
             return self
-        elif new_height is not None and new_width is None:
-            new_width = int(new_height / aspect_ratio / 0.55)
-        elif new_width is not None and new_height is None:
-            new_height = int(new_width * aspect_ratio * 0.55)
+        elif new_height and not new_width:
+            new_width = int(new_height / aspect_ratio / ratio_multiplier)
+        elif new_width and not new_height:
+            new_height = int(new_width * aspect_ratio * ratio_multiplier)
 
-        self.img = self.img.resize((new_width, new_height))
+        self.size = (new_width, new_height)
         return self
 
     def to_terminal(self):
-        text = self.char_converter.convert(self.img)
-        text = self.color_converter.convert(self.img, text)
+        text = self.char_converter.convert(self.img, self.size)
+        text = self.color_converter.convert(self.img, text, self.size)
         print(text)

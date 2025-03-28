@@ -2,7 +2,30 @@ from pascii import AsciiArt, chars, colors
 
 # ❥
 
-test_art = AsciiArt.from_path(
-    "tests/images/jaba.jpg", chars.Grayscale(True), colors.AvgColor()
-).resize(new_height=64)
-test_art.to_terminal()
+img_paths = (
+    # "tests/images/penis.png",
+    # "tests/images/python.png",
+    # "tests/images/serega.jpg",
+    "tests/images/nastya.jpg",
+    "tests/images/jaba.jpg",
+)
+
+char_converters = (
+    chars.SingleChar("❥"),
+    chars.Grayscale(),
+    # chars.Grayscale(True),
+    chars.Braille(),
+    # chars.Braille(True),
+)
+
+color_converters = (colors.AvgColor(),)
+
+for img_path in img_paths:
+    for char_converter in char_converters:
+        for color_converter in color_converters:
+            test_art = AsciiArt.from_path(
+                img_path, char_converter, color_converter
+            ).resize(new_height=64)
+            test_art.to_terminal()
+
+            print("<" + 85 * "-" + ">")
