@@ -5,6 +5,7 @@ from typing import Callable, Iterable
 from PIL import Image
 
 from pascii.consts import GSCALE
+from pascii.utils import braille_map
 
 
 class CharConverterBase(ABC):
@@ -67,10 +68,10 @@ class Braille(CharConverterBase):
         self.threshold_function = threshold_function
 
     def convert(self, img: Image.Image, size: tuple[int, int]) -> str:
-        img = img.resize((size[0] * 2, size[1] * 4)).convert("L")
+        result_width, result_height = size
 
+        img = img.resize((result_width * 2, result_height * 4)).convert("L")
         width, height = img.size
-        result_width, result_height = width // 2, height // 4
         pixels = list(img.getdata())
 
         threshold = self.threshold_function(pixels)
@@ -81,20 +82,17 @@ class Braille(CharConverterBase):
         ]
 
         ascii_image = ""
-        for i in range(0, result_height):
+        for i in range(result_height):
             row = ""
-            for j in range(0, result_width):
-                i2, j2 = i * 4, j * 2
-                p = (
-                    ((pixels[i2][j2] * 2**0) + (pixels[i2][j2 + 1] * 2**3))
-                    + ((pixels[i2 + 1][j2] * 2**1) + (pixels[i2 + 1][j2 + 1] * 2**4))
-                    + ((pixels[i2 + 2][j2] * 2**2) + (pixels[i2 + 2][j2 + 1] * 2**5))
-                    + ((pixels[i2 + 3][j2] * 2**6) + (pixels[i2 + 3][j2 + 1] * 2**7))
+            for j in range(result_width):
+                p = sum(
+                    pixels[y][x] * 2**a
+                    for a, (x, y) in enumerate(braille_map(j * 2, i * 4))
                 )
                 row += chr(int("2800", 16) + int(p))
-            ascii_image += row + "\n"
-
+            ascii_image += row
+            if i != result_height - 1:
+                ascii_image += "\n"
         # Shitty shit
-        ascii_image += "0" * 1000000
 
         return ascii_image

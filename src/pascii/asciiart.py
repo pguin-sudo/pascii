@@ -56,5 +56,12 @@ class AsciiArt:
 
     def to_terminal(self):
         text = self.char_converter.convert(self.img, self.size)
+        if (len(text.split("\n")[0]), len(text.split("\n"))) != self.size:
+            print(
+                self.char_converter,
+                (len(text.split("\n")[0]), len(text.split("\n"))),
+                self.size,
+            )
+            return
         text = self.color_converter.convert(self.img, text, self.size)
         print(text)

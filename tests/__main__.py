@@ -11,21 +11,24 @@ img_paths = (
 )
 
 char_converters = (
-    chars.SingleChar("❥"),
     chars.Grayscale(),
+    chars.SingleChar("❥"),
     # chars.Grayscale(True),
     chars.Braille(),
     # chars.Braille(True),
 )
 
-color_converters = (colors.AvgColor(),)
+color_converters = (
+    colors.AvgColor(),
+    colors.BrailleColor(),
+)
 
 for img_path in img_paths:
     for char_converter in char_converters:
         for color_converter in color_converters:
             test_art = AsciiArt.from_path(
                 img_path, char_converter, color_converter
-            ).resize(new_height=64)
+            ).resize(new_height=58)
             test_art.to_terminal()
 
             print("<" + 85 * "-" + ">")
