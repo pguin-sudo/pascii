@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 
 from PIL import Image
 
-from pascii.utils import braille_map
+from pascii.utils import braille_map, flatten_color
 
 
 class ColorConverterBase(ABC):
@@ -37,14 +37,8 @@ class AvgColor(ColorConverterBase):
         for y in range(height):
             row = ""
             for x in range(width):
-                color = img.getpixel((x, y))
-                if type(color) is tuple:
-                    row += ColorConverterBase.rgb_to_ansi(*color) + text[y * width + x]
-                else:
-                    row += (
-                        ColorConverterBase.rgb_to_ansi(color, color, color)
-                        + text[y * width + x]
-                    )
+                color = flatten_color(img.getpixel((x, y)))
+                row += ColorConverterBase.rgb_to_ansi(*color) + text[y * width + x]
 
             ascii_image += row + "\n"
 
@@ -76,11 +70,11 @@ class BrailleColor(ColorConverterBase):
             row = ""
             for j in range(result_width):
                 colors = []
-                for a, (x, y) in enumerate(braille_map(j * 2, i * 4)):
-                    color = img.getpixel((x, y))
+                for x, y in braille_map(j * 2, i * 4):
                     luma_color = img_luma.getpixel((x, y))
-                    if type(color) is not tuple or type(luma_color) is not float:
+                    if type(luma_color) is not float and type(luma_color) is not int:
                         continue
+                    color = flatten_color(img.getpixel((x, y)))
                     if (threshold >= luma_color) == self.reversed:
                         colors.append(color)
                 avg_color = (

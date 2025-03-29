@@ -62,7 +62,7 @@ class Braille(CharConverterBase):
     def __init__(
         self,
         reversed: bool = False,
-        threshold_function: Callable[[Iterable[int]], float] = median,
+        threshold_function: Callable[[list[int]], float] = median,
     ):
         self.reversed = reversed
         self.threshold_function = threshold_function

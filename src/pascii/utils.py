@@ -25,4 +25,10 @@ def braille_map(
     )
 
 
-def flatten_color(color: float | tuple[int, ...]) -> float: ...
+def flatten_color(color: float | tuple[int, ...] | None) -> tuple[int, int, int]:
+    # print(color)
+    if type(color) is tuple:
+        return (color[0], color[1], color[2])
+    if type(color) is float or type(color) is int:
+        return (int(color), int(color), int(color))
+    return (255, 255, 255)
